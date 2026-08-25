@@ -1,0 +1,52 @@
+frankG × cameron — Website
+==========================
+
+UPLOAD
+------
+Den gesamten Inhalt dieses Ordners in das Web-Root deines Servers legen
+(meist  public_html/  oder  htdocs/  oder  www/ ).
+Nicht den Ordner selbst hochladen, sondern die vier Dateien darin.
+
+  index.html            die komplette Seite (HTML, CSS, JS und Logo in einer Datei)
+  og.png                Vorschaubild beim Teilen in WhatsApp, LinkedIn, Slack usw.
+  apple-touch-icon.png  Icon, wenn die Seite auf dem iPhone-Homescreen liegt
+  favicon.png           Icon im Browser-Tab
+
+Danach ist die Seite unter deiner Domain erreichbar. Es braucht keine
+Datenbank, kein PHP, kein Build-Tool.
+
+
+DAS MUSST DU NOCH ÄNDERN
+------------------------
+Die E-Mail-Adresse ist ein Platzhalter und kommt in index.html zweimal vor:
+
+    hello@frankg-cameron.com
+
+In einem Texteditor suchen und durch deine echte Adresse ersetzen.
+Im Code steht an der Stelle ein Kommentar "TODO Frank".
+
+
+OPTIONAL, SOBALD DIE DOMAIN STEHT
+---------------------------------
+Für zuverlässige Link-Vorschauen die Zeile
+
+    <meta property="og:image" content="og.png">
+
+ersetzen durch die vollständige Adresse, z.B.
+
+    <meta property="og:image" content="https://deine-domain.ch/og.png">
+
+
+SCHRIFTEN
+---------
+Die Seite lädt Space Grotesk und Manrope von Google Fonts.
+Ohne Internet greift automatisch die System-Schrift, die Seite bleibt
+vollständig funktionsfähig. Wenn du die Schriften selbst hosten willst,
+sag Bescheid.
+
+
+TECHNISCHES
+-----------
+Keine Frameworks, keine Libraries, kein Build-Schritt.
+Responsive für iPhone, Android, iPad und Desktop.
+Berücksichtigt die Systemeinstellung "Bewegung reduzieren".
