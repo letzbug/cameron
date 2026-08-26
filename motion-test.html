@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Motion-Test — frankG × cameron</title>
+<meta name="color-scheme" content="dark">
+<style>
+  html{background-color:#05080F}
+  body{margin:0;background-color:#05080F;color:#C9D6EA;
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+    padding:clamp(20px,5vw,60px)}
+  h1{font-size:clamp(1.4rem,3.4vw,2.2rem);color:#F2F6FC;margin:0 0 6px;letter-spacing:-.02em}
+  .sub{color:#93A5C4;margin:0 0 34px}
+  .row{border-top:1px solid rgba(160,190,235,.15);padding:18px 0;
+    display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline}
+  .k{flex:0 0 240px;color:#93A5C4;font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+  .v{font-size:clamp(17px,2vw,22px);font-weight:700;color:#F2F6FC}
+  .ok{color:#5BE28A}
+  .bad{color:#FF7A7A}
+  .track{width:100%;max-width:520px;height:12px;background:rgba(160,190,235,.12);
+    position:relative;overflow:hidden}
+  .track i{position:absolute;top:0;bottom:0;width:70px;background:#3BD0FF;left:0}
+
+  /* deliberately NOT wrapped in a reduced-motion query:
+     if this bar does not move, animations are blocked at browser level */
+  @keyframes slide{from{transform:translateX(-70px)}to{transform:translateX(520px)}}
+  .css-bar i{animation:slide 1.6s linear infinite}
+
+  .verdict{margin-top:38px;padding:22px 24px;border-left:3px solid #3BD0FF;
+    background:rgba(14,165,253,.07);font-size:17px}
+  .verdict h2{margin:0 0 10px;font-size:19px;color:#F2F6FC}
+  .verdict ol{margin:12px 0 0;padding-left:20px}
+  .verdict li{margin-bottom:8px}
+  code{background:rgba(160,190,235,.12);padding:2px 6px;border-radius:3px;font-size:.92em}
+  .ua{margin-top:30px;color:#66779A;font-size:13px;word-break:break-all}
+</style>
+</head>
+<body>
+
+<h1>Motion-Test</h1>
+<p class="sub">Diese Seite prüft, warum auf deinem Rechner keine Animationen laufen.</p>
+
+<div class="row"><span class="k">CSS-Animation</span><span class="track css-bar"><i></i></span></div>
+<div class="row"><span class="k">JavaScript (requestAnimationFrame)</span><span class="track"><i id="jsbar"></i></span></div>
+<div class="row"><span class="k">prefers-reduced-motion</span><span class="v" id="prm">…</span></div>
+<div class="row"><span class="k">IntersectionObserver</span><span class="v" id="iobs">…</span></div>
+<div class="row"><span class="k">URL-Parameter motion</span><span class="v" id="param">…</span></div>
+<div class="row"><span class="k">JavaScript-Fehler</span><span class="v" id="errs">keine</span></div>
+
+<div class="verdict" id="verdict"><h2>Auswertung läuft …</h2></div>
+
+<p class="ua" id="ua"></p>
+
+<script>
+window.onerror = function(m){
+  var e = document.getElementById('errs');
+  e.textContent = m; e.className = 'v bad';
+};
+(function(){
+  var reduce = window.matchMedia
+    && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var io = 'IntersectionObserver' in window;
+  var p  = (location.search.match(/[?&]motion=(on|off)/i) || [])[1] || 'nicht gesetzt';
+
+  var prm = document.getElementById('prm');
+  prm.textContent = reduce ? 'reduce  ← Animationen sind abgeschaltet' : 'no-preference  ← alles erlaubt';
+  prm.className = 'v ' + (reduce ? 'bad' : 'ok');
+
+  var i2 = document.getElementById('iobs');
+  i2.textContent = io ? 'vorhanden' : 'FEHLT';
+  i2.className = 'v ' + (io ? 'ok' : 'bad');
+
+  document.getElementById('param').textContent = p;
+  document.getElementById('ua').textContent = navigator.userAgent;
+
+  /* rAF driven bar — proves JavaScript animation is alive */
+  var bar = document.getElementById('jsbar'), x = -70, frames = 0;
+  (function loop(){ x += 5; if (x > 520) x = -70; bar.style.transform = 'translateX(' + x + 'px)';
+    frames++; requestAnimationFrame(loop); })();
+
+  setTimeout(function(){
+    var v = document.getElementById('verdict');
+    var jsAlive = frames > 20;
+    var html;
+    if (reduce){
+      html = '<h2>Gefunden: dein System verlangt reduzierte Bewegung.</h2>' +
+        '<p>Firefox und Chrome melden <code>prefers-reduced-motion: reduce</code>. ' +
+        'Die Website schaltet daraufhin absichtlich alle Bewegung ab. Wo du das umstellst:</p>' +
+        '<ol>' +
+        '<li><b>Windows 11</b> — Einstellungen &rsaquo; Barrierefreiheit &rsaquo; Visuelle Effekte &rsaquo; <b>Animationseffekte</b> einschalten</li>' +
+        '<li><b>Windows 10</b> — Einstellungen &rsaquo; Erleichterte Bedienung &rsaquo; Anzeige &rsaquo; <b>Animationen in Windows anzeigen</b></li>' +
+        '<li><b>macOS</b> — Systemeinstellungen &rsaquo; Bedienungshilfen &rsaquo; Anzeige &rsaquo; <b>Bewegung reduzieren</b> ausschalten</li>' +
+        '<li><b>Firefox</b> — <code>about:config</code> &rsaquo; <code>ui.prefersReducedMotion</code> muss <code>0</code> sein</li>' +
+        '<li><b>Chrome</b> — DevTools &rsaquo; Rendering &rsaquo; „Emulate prefers-reduced-motion" auf <b>No emulation</b></li>' +
+        '</ol><p>Danach Browser neu starten und die Seite mit <code>Strg+Shift+R</code> neu laden.</p>';
+    } else if (!jsAlive){
+      html = '<h2>JavaScript läuft nicht.</h2><p>Die Seite darf keine Skripte ausführen — ' +
+        'vermutlich eine Erweiterung wie NoScript oder uBlock im harten Modus, oder JavaScript ist deaktiviert. ' +
+        'Prüfe es auf dieser Seite im Inkognito-Fenster ohne Erweiterungen.</p>';
+    } else {
+      var cssMoves = 'Wenn der obere Balken steht, der untere aber läuft, blockiert etwas gezielt CSS-Animationen — ' +
+        'meist eine Browser-Erweiterung oder ein Flag.';
+      html = '<h2>Beide Systeme sind in Ordnung.</h2>' +
+        '<p>Bewegung ist erlaubt und JavaScript läuft. Schau kurz auf die zwei Balken oben:</p>' +
+        '<p>' + cssMoves + ' Laufen beide, liegt es nicht am Browser — dann schick mir bitte einen Screenshot ' +
+        'dieser Seite, und wir suchen es im Code.</p>';
+    }
+    v.innerHTML = html;
+  }, 900);
+})();
+</script>
+</body>
+</html>

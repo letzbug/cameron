@@ -360,22 +360,64 @@ html.ready .hero__copy>*:nth-child(2){transition-delay:.30s}
 html.ready .hero__copy>*:nth-child(3){transition-delay:.90s}
 html.ready .hero__copy>*:nth-child(4){transition-delay:1.02s}
 
+/* ---------- CALM MODE ----------
+   Applied when the operating system asks for reduced motion, and forceable
+   with ?motion=off. ?motion=on overrides the OS and plays everything.
+   Movement is removed, gentle opacity fades stay — the page never feels dead.
+   The media query below covers the two CSS-only loops if JS never runs.      */
 @media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation:none!important;transition-duration:.001ms!important}
-  [data-r],.hero__copy>*,.stage>*{opacity:1;transform:none}
-  .rule{transform:scaleX(1)}
-  .rule::after{display:none}
-  .c{opacity:1;transform:none}
-  .ln>span{transform:none}
-  .braid .base{stroke-dashoffset:0}
-  .braid .flow,.braid .knot{display:none}
-  .braid .pip{opacity:1}
-  .act__id i{transform:scale(1)}
-  .big::after{transform:scaleX(1)}
-  .brand b{opacity:1;transform:none}
-  .beam{color:var(--tx-2);background-image:none;-webkit-text-fill-color:currentColor}
+  .navlink i{animation:none}
+  #markSlot::after{animation:none}
 }
+html.calm .navlink i,html.calm #markSlot::after{animation:none}
+html.calm .spot{display:none}
+html.calm [data-r]{transform:none;transition:opacity .6s linear}
+html.calm .hero__copy>*,html.calm .stage>*{transform:none;transition:opacity .6s linear}
+html.calm .c{opacity:1;transform:none;transition:none}
+html.calm .ln>span{transform:none;transition:none}
+html.calm .rule{transform:scaleX(1);transition:none}
+html.calm .rule::after{display:none}
+html.calm .braid .base{stroke-dashoffset:0;transition:none}
+html.calm .braid .flow,html.calm .braid .knot{display:none}
+html.calm .braid .pip{opacity:1;transition:none}
+html.calm .act__id i{transform:scale(1);transition:none}
+html.calm .big::after{transform:scaleX(1);transition:none}
+html.calm .brand b{opacity:1;transform:none}
+html.calm .beam{color:var(--tx-2);background-image:none;-webkit-text-fill-color:currentColor}
+
+/* ---------- SAFETY NET ----------
+   Everything above hides elements until JavaScript reveals them. If the boot
+   script in <head> never ran, this makes the whole page visible anyway.      */
+html:not(.anim) [data-r],
+html:not(.anim) .hero__copy>*,
+html:not(.anim) .stage>*,
+html:not(.anim) .c{opacity:1!important;transform:none!important}
+html:not(.anim) .ln>span{transform:none!important}
+html:not(.anim) .rule{transform:scaleX(1)!important}
+html:not(.anim) .braid .base{stroke-dashoffset:0!important}
+html:not(.anim) .braid .pip{opacity:1!important}
+html:not(.anim) .act__id i{transform:scale(1)!important}
+html:not(.anim) .big::after{transform:scaleX(1)!important}
+html:not(.anim) .brand b{opacity:1!important;transform:none!important}
+html:not(.anim) .beam{color:var(--tx-2)!important;background-image:none!important;
+  -webkit-text-fill-color:currentColor!important}
 </style>
+
+<script>
+/* Decides the motion state before the first paint and records it on <html>.
+   Inspect the <html> tag in DevTools to see the result:
+     class="anim"        animations active
+     class="anim calm"   reduced motion — the OS asked for it, or ?motion=off
+   Force it either way with  ?motion=on  /  ?motion=off                       */
+(function(){
+  var r = document.documentElement;
+  var f = (location.search.match(/[?&]motion=(on|off)/i) || [])[1];
+  var reduce = f ? f.toLowerCase() === 'off'
+                 : !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  window.__calm = reduce;
+  r.className = (r.className + ' anim' + (reduce ? ' calm' : '')).trim();
+})();
+</script>
 </head>
 <body>
 
@@ -563,7 +605,7 @@ html.ready .hero__copy>*:nth-child(4){transition-delay:1.02s}
 (function(){
   "use strict";
   var root   = document.documentElement;
-  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var reduce = !!window.__calm;   /* decided by the boot script in <head> */
   var fine   = matchMedia('(pointer: fine)').matches && window.innerWidth > 900;
   function clamp01(v){ return v<0?0:v>1?1:v; }
 

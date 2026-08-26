@@ -8,6 +8,8 @@ Den gesamten Inhalt dieses Ordners in das Web-Root deines Servers legen
 Nicht den Ordner selbst hochladen, sondern die vier Dateien darin.
 
   index.html            die komplette Seite (HTML, CSS, JS und Logo in einer Datei)
+  motion-test.html      Diagnose-Seite, falls keine Animationen laufen
+                        (muss nicht mit hochgeladen werden)
   og.png                Vorschaubild beim Teilen in WhatsApp, LinkedIn, Slack usw.
   apple-touch-icon.png  Icon, wenn die Seite auf dem iPhone-Homescreen liegt
   favicon.png           Icon im Browser-Tab
@@ -43,6 +45,38 @@ Die Seite lädt Space Grotesk und Manrope von Google Fonts.
 Ohne Internet greift automatisch die System-Schrift, die Seite bleibt
 vollständig funktionsfähig. Wenn du die Schriften selbst hosten willst,
 sag Bescheid.
+
+
+ANIMATIONEN
+-----------
+Die Seite respektiert die Systemeinstellung "Bewegung reduzieren".
+Ist die aktiv, laeuft eine ruhige Version ohne Bewegung - das ist so gewollt.
+
+Zum Testen und fuer Praesentationen gibt es zwei Schalter in der Adresszeile:
+
+    deine-domain.ch/?motion=on     Animationen immer abspielen
+    deine-domain.ch/?motion=off    ruhige Version erzwingen
+
+Falls du keine Animationen siehst: oeffne motion-test.html.
+Die Seite sagt dir in fuenf Sekunden, woran es liegt.
+
+Ausserdem steht der Zustand direkt im HTML. In den Entwicklertools
+das <html>-Tag anschauen:
+
+    class="anim"        Animationen aktiv
+    class="anim calm"   reduzierte Bewegung aktiv
+
+Die haeufigste Ursache ist eine dieser Einstellungen:
+
+  Windows 11   Einstellungen > Barrierefreiheit > Visuelle Effekte
+               > Animationseffekte  einschalten
+  Windows 10   Einstellungen > Erleichterte Bedienung > Anzeige
+               > Animationen in Windows anzeigen  einschalten
+  macOS        Systemeinstellungen > Bedienungshilfen > Anzeige
+               > Bewegung reduzieren  ausschalten
+  Firefox      about:config > ui.prefersReducedMotion  muss 0 sein
+  Chrome       DevTools > Rendering > "Emulate prefers-reduced-motion"
+               auf "No emulation" stellen
 
 
 TECHNISCHES
